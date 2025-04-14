@@ -1,33 +1,31 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className='bg-[#172234] h-screen w-screen py-[2em] px-[15em] space-y-[2em]'>
+        <h1 className='text-[2em] text-center text-white font-inter font-semibold'>Methodize Flow</h1>
+        <p className='text-left text-[1.3em] text-white font-semibold font-inter'>Your tasks</p>
+        
+        <div className='grid grid-cols-4 gap-4 grid-rows-auto'>
+
+          <div className='bg-[#48638E] rounded-[12px] pb-[2em] min-h-[20em]'>
+            <div>
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="#e3e3e3"><path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z"/></svg>
+            </div>
+          </div>
+
+          <div className='bg-[#48638E] rounded-[12px] pb-[2em] min-h-[20em]'>
+            <div className='bg-white rounded-t-[12px] p-[1em]'>
+              <h1>Title</h1>
+            </div>
+          </div>
+
+        </div>
+
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
   )
 }
