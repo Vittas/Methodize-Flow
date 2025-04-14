@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "title": "Card",
+    "description": "Descrição da tarefa",
+    "priority": "Low",
+    "completed": false
+  },
+  {
+    "id": 2,
+    "title": "Título card",
+    "description": "Descrição da tarefa",
+    "priority": "Medium",
+    "completed": false
+  },
+  {
+    "id": 3,
+    "title": "Título card",
+    "description": "Descrição da tarefa",
+    "priority": "High",
+    "completed": true
+  }
+]
