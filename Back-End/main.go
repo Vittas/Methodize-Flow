@@ -24,7 +24,9 @@ func main() {
 	loadData(dataFile)
 	printData()
 
-	http.HandleFunc("/CardsData", cardsHandler)
+
+	http.HandleFunc("/CardsData", getCardsHandler)
+	http.HandleFunc("/CardsData/add", postCardHandler)
 	http.HandleFunc("/CardsData/update", updateHandler)
 	http.HandleFunc("/CardsData/dell", deleteHandler)
 	http.HandleFunc("/", homeHandler)
@@ -54,35 +56,38 @@ func printData() {
 	}
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request) {fmt.Fprintf(w, "Methodize-Flow\nEndpoints:\n-GET/POST : /CardsData\n-PUT : /CardsData/update?id=1\n-DELETE : /CardsData/dell?id=1")}
+func homeHandler(w http.ResponseWriter, r *http.Request){
+	fmt.Fprintf(w, "Methodize-Flow\nEndpoints:\n-GET : /CardsData\nPOST : /CardsData/add\n-PUT : /CardsData/update?id=1\n-DELETE : /CardsData/dell?id=1")
+}
 
-func cardsHandler(w http.ResponseWriter, r *http.Request) {
+func getCardsHandler(w http.ResponseWriter, r *http.Request){
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
-    w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-    w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-
-    // Responde a requisições OPTIONS (pré-flight do navegador)
-    if r.Method == "OPTIONS" {
-        w.WriteHeader(http.StatusOK)
-        return
-    }
-	switch r.Method {
-	case "GET":
-		json.NewEncoder(w).Encode(dataSet)
-	case "POST":
-		var newCard Card
-		if err := json.NewDecoder(r.Body).Decode(&newCard); err != nil {
-			http.Error(w, "JSON inválido", http.StatusBadRequest)
-			return
-		}
-		newCard.Id = len(dataSet) + 1
-		dataSet = append(dataSet, newCard)
-		saveData()
-		json.NewEncoder(w).Encode(newCard)
-	default:
+	
+	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
 	}
+
+	json.NewEncoder(w).Encode(dataSet)
+}
+
+func postCardHandler(w http.ResponseWriter, r *http.Request){
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	if r.Method != "POST" {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	var newCard Card
+	if err := json.NewDecoder(r.Body).Decode(&newCard); err != nil {
+		http.Error(w, "JSON invalid", http.StatusBadRequest)
+		return
+	}
+	newCard.Id = len(dataSet) + 1
+	dataSet = append(dataSet, newCard)
+	saveData()
+	json.NewEncoder(w).Encode(newCard)
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
