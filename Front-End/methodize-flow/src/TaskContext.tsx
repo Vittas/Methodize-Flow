@@ -14,6 +14,7 @@ interface TaskContextInterface {
     taskList: TaskInterface[]
     createTask: (title: string, description: string, priority: "Low" | "Medium" | "High") => any,
     fetchTasks: () => Promise<void>
+    deleteTask: (id:number) => Promise<void>
 }
 
 export const contextTask = createContext({} as TaskContextInterface)
@@ -45,13 +46,20 @@ export const TaskContext = ({ children }: any) => {
                 completed: false,
             }
 
-            const response = await axios.post("http://localhost:8080/CardsData", newTask)
+            const response = await axios.post("http://localhost:8080/CardsData/add", newTask, {
+                headers: {
+                    "Content-Type": "application/json"
+                }
+            })
             setTaskList(prev => [...prev, response.data]) // atualiza com o que veio da API
         } catch (err) {
             console.error("Erro ao criar tarefa", err)
         }
     }
 
+    const deleteTask = async (id: number) => {
+        await axios.delete(`http://localhost:8080/CardsData/dell?id=${id}`)
+    }
 
     useEffect(() => {
         fetchTasks()
@@ -59,7 +67,7 @@ export const TaskContext = ({ children }: any) => {
 
 
     return (
-        <contextTask.Provider value={{ taskList, createTask, fetchTasks }}>
+        <contextTask.Provider value={{ taskList, createTask, fetchTasks, deleteTask }}>
             {children}
         </contextTask.Provider>
     )
