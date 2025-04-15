@@ -56,14 +56,24 @@ func printData() {
 	}
 }
 
+func enableCors(w *http.ResponseWriter) {
+	(*w).Header().Set("Access-Control-Allow-Origin", "*")
+	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+}
+
 func homeHandler(w http.ResponseWriter, r *http.Request){
+	enableCors(&w)
 	fmt.Fprintf(w, "Methodize-Flow\nEndpoints:\n-GET : /CardsData\nPOST : /CardsData/add\n-PUT : /CardsData/update?id=1\n-DELETE : /CardsData/dell?id=1")
 }
 
 func getCardsHandler(w http.ResponseWriter, r *http.Request){
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	
+	enableCors(&w)
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -73,8 +83,14 @@ func getCardsHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func postCardHandler(w http.ResponseWriter, r *http.Request){
+	enableCors(&w)
 	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != "POST" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -91,7 +107,14 @@ func postCardHandler(w http.ResponseWriter, r *http.Request){
 }
 
 func updateHandler(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != "PUT" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -121,7 +144,14 @@ func updateHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func deleteHandler(w http.ResponseWriter, r *http.Request) {
+	enableCors(&w)
 	w.Header().Set("Content-Type", "application/json")
+
+	if r.Method == "OPTIONS" {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
 	if r.Method != "DELETE" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -137,7 +167,7 @@ func deleteHandler(w http.ResponseWriter, r *http.Request) {
 			dataSet = append(dataSet[:i], dataSet[i+1:]...)
 			saveData()
 			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, `{"message": "Card %d delet"}`, id)
+			fmt.Fprintf(w, `{"message": "Card %d delete"}`, id)
 			return
 		}
 	}
