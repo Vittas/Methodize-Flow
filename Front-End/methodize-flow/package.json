@@ -4,6 +4,8 @@
   "version": "1.0.0",
   "description": "My Electron application description",
   "main": ".webpack/main",
+  "proxy": "http://localhost:8080",
+  
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
@@ -47,6 +49,7 @@
     "typescript": "~4.5.4"
   },
   "dependencies": {
+    "axios": "^1.8.4",
     "electron-squirrel-startup": "^1.0.1",
     "postcss-loader": "^8.1.1",
     "react": "^19.1.0",

@@ -8,16 +8,9 @@
   },
   {
     "id": 2,
-    "title": "Título card",
-    "description": "Descrição da tarefa",
-    "priority": "Medium",
-    "completed": false
-  },
-  {
-    "id": 3,
-    "title": "Título card",
-    "description": "Descrição da tarefa",
+    "title": "asdd",
+    "description": "sdf",
     "priority": "High",
-    "completed": true
+    "completed": false
   }
 ]

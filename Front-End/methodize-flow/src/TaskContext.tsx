@@ -1,6 +1,7 @@
+import axios from "axios"
 import { Children, createContext, JSX, useEffect, useState } from "react"
 
-interface TaskInterface{
+interface TaskInterface {
     id: number,
     title: string,
     description: string,
@@ -9,71 +10,56 @@ interface TaskInterface{
 }
 
 
-interface TaskContextInterface{
-    taskList: any
+interface TaskContextInterface {
+    taskList: TaskInterface[]
     createTask: (title: string, description: string, priority: "Low" | "Medium" | "High") => any,
-}   
+    fetchTasks: () => Promise<void>
+}
 
 export const contextTask = createContext({} as TaskContextInterface)
 
 
-export const TaskContext = ({children} : any) => {
+export const TaskContext = ({ children }: any) => {
+
+    const [taskList, setTaskList] = useState<TaskInterface[]>([])
+
+
+    const fetchTasks = async () => {
+        try {
+            const response = await axios.get<TaskInterface[]>("http://localhost:8080/CardsData")
+
+            console.log(response.data)
+            setTaskList(response.data)
+        } catch (err) {
+            console.error("There's something wrong into get function.", err)
+        }
+    }
+
+
+    const createTask = async (title: string, description: string, priority: "Low" | "Medium" | "High") => {
+        try {
+            const newTask = {
+                title,
+                description,
+                priority,
+                completed: false,
+            }
+
+            const response = await axios.post("http://localhost:8080/CardsData", newTask)
+            setTaskList(prev => [...prev, response.data]) // atualiza com o que veio da API
+        } catch (err) {
+            console.error("Erro ao criar tarefa", err)
+        }
+    }
+
 
     useEffect(() => {
-        // const GetTaskList = await API DO ICARO
+        fetchTasks()
+    }, [])
 
-        // for(let i in GetTaskList.length){
-            
-            // if(getTaskList[i].priority === "Low"){
-            // const task = <div className='bg-[#ADBCA5] rounded-[12px] pb-[2em] min-h-[20em]'>
-            //      <div className='bg-[#38AA32] rounded-t-[12px] p-[1em]'>
-            //          <h1 className="text-center">GetTaskList[i].title</h1>
-            //      </div>
-            //      <div className="p-[1em] rounded-b-[12px]">
-            //          GetTaskList[i].description
-            //      </div>
-            // </div>
-            // setTaskList(task)
-            // }
-            // elseif(getTaskList[i].priority === "Medium"){
 
-                // const task = <div className='bg-[#BCAEA5]  rounded-[12px] pb-[2em] min-h-[20em]'>
-                //     <div className='bg-[#E28B27] rounded-t-[12px] p-[1em]'>
-                //         <h1 className="text-center">GetTaskList[i].title</h1>
-                //     </div>
-                //     <div>
-                //         GetTaskList[i].description
-                //     </div>
-                // </div>
-                // setTaskList(task)
-
-            // }
-            // else{
-                    // const task = <div className='bg-[#BCA5A5] rounded-[12px] pb-[2em] min-h-[20em]'>
-                    //      <div className='bg-[#E22727] rounded-t-[12px] p-[1em]'>
-                    //          <h1 className="text-center">GetTaskList[i].title</h1>
-                    //      </div>
-                    //      <div>
-                    //          GetTaskList[i].description
-                    //      </div>
-                    // </div>
-                    // setTaskList(task)
-
-            // }
-
-        // }
-
-        // setTaskList(GetTaskList)
-    })
-
-    const [taskList, setTaskList] = useState([])
-
-    const createTask = (title: string, description: string, priority: "Low" | "Medium" | "High") => {
-        taskList.push({ title, description, priority } as TaskInterface)
-    }
-    
-    return(
-        <contextTask.Provider value={{ taskList, createTask }}>
+    return (
+        <contextTask.Provider value={{ taskList, createTask, fetchTasks }}>
             {children}
         </contextTask.Provider>
     )

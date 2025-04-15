@@ -58,7 +58,15 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {fmt.Fprintf(w, "Method
 
 func cardsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+    w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+    w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
 
+    // Responde a requisições OPTIONS (pré-flight do navegador)
+    if r.Method == "OPTIONS" {
+        w.WriteHeader(http.StatusOK)
+        return
+    }
 	switch r.Method {
 	case "GET":
 		json.NewEncoder(w).Encode(dataSet)

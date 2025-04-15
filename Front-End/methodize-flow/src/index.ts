@@ -27,7 +27,16 @@ const createWindow = (): void => {
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
+
+  mainWindow.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    callback({
+      responseHeaders: {
+        ...details.responseHeaders,
+        "Content-Security-Policy": ["default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"]
+      }
+    })
+  })
   
 };
 
