@@ -19,9 +19,9 @@ export const TaskDisplayer = () => {
                             task.priority === "Medium" ? "bg-[#E28B27]" :
                                 "bg-[#E22727]"
                         }`}>
-                        <h1 className="text-center text-white font-bold">{task.title}</h1>
+                        <h1 className="text-center text-white font-bold break-all">{task.title}</h1>
                     </div>
-                    <div className="p-[1em] text-white">
+                    <div className="p-[1em] text-white break-all">
                         {task.description}
                     </div>
                 </div>

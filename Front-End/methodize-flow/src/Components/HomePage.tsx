@@ -7,7 +7,7 @@ export const Homepage = () => {
 
   return (
     <div className="flex">
-      <div className="bg-[#172234] h-screen w-screen py-[2em] px-[15em] space-y-[2em]">
+      <div className="bg-[#172234] h-auto min-h-screen w-screen py-[2em] px-[15em] space-y-[2em]">
         <h1 className="text-[2em] text-center text-white font-semibold">Methodize Flow</h1>
         <p className="text-left text-[1.3em] text-white font-semibold font-inter">Your tasks</p>
 

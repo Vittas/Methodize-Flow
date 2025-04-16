@@ -58,7 +58,13 @@ export const TaskContext = ({ children }: any) => {
     }
 
     const deleteTask = async (id: number) => {
-        await axios.delete(`http://localhost:8080/CardsData/dell?id=${id}`)
+        try{
+            await axios.delete(`http://localhost:8080/CardsData/dell?id=${id}`)
+            setTaskList(prev => prev.filter(task => task.id !== id))
+        }
+        catch (err) {
+            console.error("Erro ao criar tarefa", err)
+        }
     }
 
     useEffect(() => {
