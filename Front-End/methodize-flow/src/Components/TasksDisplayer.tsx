@@ -14,14 +14,15 @@ export const TaskDisplayer = () => {
                         task.priority === "Medium" ? "bg-[#BCAEA5]" :
                             "bg-[#BCA5A5]"
                     }`}
-                    onClick={()=>{ GlobalTaskContext.deleteTask(task.id) && console.log(task.id) }}>
+                    onClick={()=>{ GlobalTaskContext.deleteTask(task.id) && console.log(task.id) }}
+                    >
                     <div className={`rounded-t-[12px] p-[1em] ${task.priority === "Low" ? "bg-[#38AA32]" :
                             task.priority === "Medium" ? "bg-[#E28B27]" :
                                 "bg-[#E22727]"
                         }`}>
-                        <h1 className="text-center text-white font-bold">{task.title}</h1>
+                        <h1 className="text-center text-white font-bold break-all">{task.title}</h1>
                     </div>
-                    <div className="p-[1em] text-white">
+                    <div className="p-[1em] text-white break-all">
                         {task.description}
                     </div>
                 </div>
