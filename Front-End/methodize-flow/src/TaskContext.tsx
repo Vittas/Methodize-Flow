@@ -66,6 +66,22 @@ export const TaskContext = ({ children }: any) => {
         }
     }
 
+    const getTask = async (id: string) => {
+        try {
+            const response = await axios.get(`http://localhost:8080/CardsData/`)
+        } catch (err) {
+            console.error
+        }
+    }
+
+    const updateTask = async (id: number, title: string, description: string, priority: string) => {
+        try {
+
+        } catch (err) {
+            console.error()
+        }
+    }
+
     useEffect(() => {
         fetchTasks()
     }, [])
