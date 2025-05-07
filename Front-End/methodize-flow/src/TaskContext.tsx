@@ -14,7 +14,7 @@ interface TaskContextInterface {
     taskList: TaskInterface[]
     createTask: (title: string, description: string, priority: "Low" | "Medium" | "High") => any,
     fetchTasks: () => Promise<void>
-    deleteTask: (id: number) => Promise<void>
+    deleteTask: (id:number) => Promise<void>
 }
 
 export const contextTask = createContext({} as TaskContextInterface)
@@ -58,11 +58,12 @@ export const TaskContext = ({ children }: any) => {
     }
 
     const deleteTask = async (id: number) => {
-        try {
+        try{
             await axios.delete(`http://localhost:8080/CardsData/dell?id=${id}`)
-            setTaskList(prev => prev.filter(task => task.id !== id)) // atualiza a lista
-        } catch (err) {
-            console.error("Erro ao deletar tarefa", err)
+            setTaskList(prev => prev.filter(task => task.id !== id))
+        }
+        catch (err) {
+            console.error("Erro ao criar tarefa", err)
         }
     }
 

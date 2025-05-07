@@ -4,7 +4,6 @@ import { TaskDisplayer } from "./TasksDisplayer"
 
 export const Homepage = () => {
   const [visibility, setVisibility] = useState(false)
-  const [plusColor, setPlusColor] = useState("#94ACDB")
 
   return (
     <div className="flex">
@@ -16,10 +15,8 @@ export const Homepage = () => {
           <div
             className="bg-[#48638E] rounded-[12px] min-h-[20em] flex items-center justify-center cursor-pointer hover:bg-[#2E415F]"
             onClick={() => setVisibility(true)}
-            onMouseEnter={()=>{setPlusColor("#657699")}}
-            onMouseLeave={()=>{setPlusColor("#94ACDB")}}
           >
-            <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px"  fill={plusColor}>
+            <svg xmlns="http://www.w3.org/2000/svg" height="64px" viewBox="0 -960 960 960" width="64px" fill="#94ACDB">
               <path d="M440-440H200v-80h240v-240h80v240h240v80H520v240h-80v-240Z" />
             </svg>
           </div>

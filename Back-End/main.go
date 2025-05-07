@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"strconv"
+	"github.com/gin-gonic/gin"
 )
 
 type Card struct {
@@ -24,15 +25,33 @@ func main() {
 	loadData(dataFile)
 	printData()
 
+	router := gin.Default()
 
-	http.HandleFunc("/CardsData", getCardsHandler)
-	http.HandleFunc("/CardsData/add", postCardHandler)
-	http.HandleFunc("/CardsData/update", updateHandler)
-	http.HandleFunc("/CardsData/dell", deleteHandler)
-	http.HandleFunc("/", homeHandler)
+	router.SetTrustedProxies([]string{"127.0.0.1"})
+	router.Use(corsMiddleware())
+	
+	router.GET("/", homeHandler)
+	router.GET("/CardsData", getCardsHandler)
+	router.GET("/CardsData/get", getCardByIDHandler)
+	router.POST("/CardsData/add", postCardHandler)
+	router.PUT("/CardsData/update", updateHandler)
+	router.DELETE("/CardsData/dell", deleteHandler)
 
 	fmt.Println("\nServidor rodando em http://localhost:8080")
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	router.Run(":8080")
+}
+
+func corsMiddleware() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		if c.Request.Method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusOK)
+			return
+		}
+		c.Next()
+	}
 }
 
 func loadData(filename string) {
@@ -56,120 +75,109 @@ func printData() {
 	}
 }
 
-func enableCors(w *http.ResponseWriter) {
-	(*w).Header().Set("Access-Control-Allow-Origin", "*")
-	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type")
+func homeHandler(c *gin.Context) {
+	c.String(http.StatusOK, "Methodize-Flow\nEndpoints:\n-GET : /CardsData\n-GET : /CardsData/get?id=1\n-POST : /CardsData/add\n-PUT : /CardsData/update?id=1\n-DELETE : /CardsData/dell?id=1")
 }
 
-func homeHandler(w http.ResponseWriter, r *http.Request){
-	enableCors(&w)
-	fmt.Fprintf(w, "Methodize-Flow\nEndpoints:\n-GET : /CardsData\nPOST : /CardsData/add\n-PUT : /CardsData/update?id=1\n-DELETE : /CardsData/dell?id=1")
+func getCardsHandler(c *gin.Context) {
+	c.JSON(http.StatusOK, dataSet)
 }
 
-func getCardsHandler(w http.ResponseWriter, r *http.Request){
-	enableCors(&w)
-
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-	if r.Method != "GET" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	json.NewEncoder(w).Encode(dataSet)
+func getCardByIDHandler(c *gin.Context) {
+    idStr := c.Query("id")
+    if idStr == "" {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Parameter 'id' is required",
+        })
+        return
+    }
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid ID",
+            "details": err.Error(),
+        })
+        return
+    }
+    for _, card := range dataSet {
+        if card.Id == id {
+            c.JSON(http.StatusOK, card)
+            return
+        }
+    }
+    c.JSON(http.StatusNotFound, gin.H{
+        "error": fmt.Sprintf("Card with ID %d not found", id),
+    })
 }
 
-func postCardHandler(w http.ResponseWriter, r *http.Request){
-	enableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
-
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	if r.Method != "POST" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+func postCardHandler(c *gin.Context) {
 	var newCard Card
-	if err := json.NewDecoder(r.Body).Decode(&newCard); err != nil {
-		http.Error(w, "JSON invalid", http.StatusBadRequest)
+	if err := c.ShouldBindJSON(&newCard); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid JSON"})
 		return
 	}
 	newCard.Id = len(dataSet) + 1
 	dataSet = append(dataSet, newCard)
 	saveData()
-	json.NewEncoder(w).Encode(newCard)
+	c.JSON(http.StatusCreated, newCard)
 }
 
-func updateHandler(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
-
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	if r.Method != "PUT" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	idStr := r.URL.Query().Get("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		http.Error(w, "Id invalid", http.StatusBadRequest)
-		return
-	}
-
-	var updatedCard Card
-	if err := json.NewDecoder(r.Body).Decode(&updatedCard); err != nil {
-		http.Error(w, "JSON invalid", http.StatusBadRequest)
-		return
-	}
-	for i, card := range dataSet {
-		if card.Id == id {
-			updatedCard.Id = id
-			dataSet[i] = updatedCard
-			saveData()
-			json.NewEncoder(w).Encode(updatedCard)
-			return
-		}
-	}
-	http.Error(w, "Card not found", http.StatusNotFound)
+func updateHandler(c *gin.Context) {
+    idStr := c.Query("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid ID",
+            "details": err.Error(),
+        })
+        return
+    }
+    var updatedCard Card
+    if err := c.ShouldBindJSON(&updatedCard); err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid data",
+            "details": err.Error(),
+        })
+        return
+    }
+    for i, card := range dataSet {
+        if card.Id == id {
+            updatedCard.Id = id
+            dataSet[i] = updatedCard
+            saveData()
+            c.JSON(http.StatusOK, gin.H{
+                "message": "Card updated successfully",
+                "card": updatedCard,
+            })
+            return
+        }
+    }
+    c.JSON(http.StatusNotFound, gin.H{
+        "error": fmt.Sprintf("Card with ID %d not found", id),
+    })
 }
 
-func deleteHandler(w http.ResponseWriter, r *http.Request) {
-	enableCors(&w)
-	w.Header().Set("Content-Type", "application/json")
-
-	if r.Method == "OPTIONS" {
-		w.WriteHeader(http.StatusOK)
-		return
-	}
-
-	if r.Method != "DELETE" {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-	idStr := r.URL.Query().Get("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		http.Error(w, "Id invalid", http.StatusBadRequest)
-		return
-	}
-	for i, card := range dataSet {
-		if card.Id == id {
-			dataSet = append(dataSet[:i], dataSet[i+1:]...)
-			saveData()
-			w.WriteHeader(http.StatusOK)
-			fmt.Fprintf(w, `{"message": "Card %d delete"}`, id)
-			return
-		}
-	}
-	http.Error(w, "Card not found", http.StatusNotFound)
+func deleteHandler(c *gin.Context) {
+    idStr := c.Query("id")
+    id, err := strconv.Atoi(idStr)
+    if err != nil {
+        c.JSON(http.StatusBadRequest, gin.H{
+            "error": "Invalid ID",
+            "details": err.Error(),
+        })
+        return
+    }
+    for i, card := range dataSet {
+        if card.Id == id {
+            dataSet = append(dataSet[:i], dataSet[i+1:]...)
+            saveData()
+            c.JSON(http.StatusOK, gin.H{
+                "message": fmt.Sprintf("Card %d remove successfully", id),
+            })
+            return
+        }
+    }
+    c.JSON(http.StatusNotFound, gin.H{
+        "error": fmt.Sprintf("Card with ID %d not found", id),
+    })
 }
